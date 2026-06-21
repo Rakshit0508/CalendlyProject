@@ -1,0 +1,45 @@
+version: "3.9"
+
+services:
+
+  postgres_db:
+    image: postgres:17
+    container_name: postgres_db
+
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password123
+      POSTGRES_DB: calendly_db
+
+    ports:
+      - "5433:5432"
+
+    networks:
+      - network_bridge
+
+
+  Calendly_backend_container:
+    image: calendly-image:latest
+    build: .
+
+    container_name: Calendly_backend_container
+
+    ports:
+      - "3001:3001"
+
+    volumes:
+      - .:/app/calendly_backend
+      - calendly-node-modules:/app/calendly_backend/node_modules
+
+    networks:
+      - network_bridge
+
+
+networks:
+  network_bridge:
+    driver: bridge
+
+
+volumes:
+  postgres_data:
+  calendly-node-modules:
