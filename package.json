@@ -6,7 +6,10 @@
   "scripts": {
     "dev": "nodemon --watch src --ext ts --exec 'tsx src/server.ts'",
     "build": "tsc",
-    "seed": "tsx prisma/seed.ts"
+    "seed": "tsx prisma/seed.ts",
+    "prisma:format":"pnpx prisma format",
+    "prisma:migrate":"pnpx prisma migrate dev",
+    "prisma:generate":"pnpx prisma generate"
   },
   "keywords": [],
   "author": "",

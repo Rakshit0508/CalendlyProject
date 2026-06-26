@@ -5,4 +5,15 @@ export const createUserSchema= z.object({
     name: z.string().min(1,'Name is required').max(100,'Name should be less than 100 characters')
 });
 
+export const updateUserSchema= z.object({
+    email:z.email('Invalid email address').optional(),
+    name: z.string().min(1,'Name is required').max(100,'Name should be less than 100 characters').optional()
+}).refine(
+    (data) => data.email !== undefined || data.name !== undefined,
+    {
+      message: "At least one field (email or name) must be provided.",
+    }
+  );
+
 export type CreateUserDto= z.infer<typeof createUserSchema>;
+export type UpdateUserDto= z.infer<typeof updateUserSchema>;

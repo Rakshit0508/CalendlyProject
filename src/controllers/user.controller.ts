@@ -1,6 +1,7 @@
 import {Request, Response} from 'express';
 import { createUserByNameAndEmail as createUserByNameAndEmailService, deleteUserByEmail as deleteUserByEmailService, findAllUsers as findAllUsersService, findUserById as findUserByIdService, updateUserByEmail as updateUserByEmailService} from '../services/users.service.js';
 import { sendSuccess } from '../utils/api-response.js';
+import { CreateUserDto, UpdateUserDto } from '../dtos/user.dto.js';
 
 
 export async function findAllusers(_req:Request, res:Response){
@@ -16,19 +17,20 @@ export async function findUserId(req:Request, res:Response){
 }
 
 export async function createSingleUser(req:Request, res:Response){
-    const {name,email}= req.body;
-    const response= await createUserByNameAndEmailService(name,email);
-    sendSuccess(res,response);
+    const dto: CreateUserDto= req.body;
+    const response= await createUserByNameAndEmailService(dto);
+    sendSuccess(res,response,201,'User created successfully');
 }
 
 export async function deleteSingleUser(req:Request,res:Response){
-    const {email}= req.body;
-    const response= await deleteUserByEmailService(email);
-    res.json(response);
+    const {id}= req.params;
+    const response= await deleteUserByEmailService(Number(id));
+    sendSuccess(res,response,201,'User deleted successfully');
 }
 
 export async function updateSingleUser(req:Request,res:Response){
-    const {newName,newEmail,email}= req.body;
-    const response= await updateUserByEmailService(email,newName,newEmail);
-    res.json(response);
+    const {id}= req.params;
+    const dto: UpdateUserDto= req.body;
+    const response= await updateUserByEmailService(Number(id),dto);
+    sendSuccess(res,response,201,'User updated successfully');
 }

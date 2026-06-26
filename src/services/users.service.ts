@@ -1,5 +1,6 @@
+import { CreateUserDto, UpdateUserDto } from "../dtos/user.dto.js";
 import { createUser, deleteUser, getAll, getByEmail, getById, updateUser } from "../repositories/user.repository.js";
-import { badRequest, notFound } from "../utils/api-error.js";
+import { badRequest, internalServerError, notFound } from "../utils/api-error.js";
 
 export async function findAllUsers(){
     const users= await getAll();
@@ -14,42 +15,44 @@ export async function findUserById(id:number){
     return user;
 }
 
-export async function createUserByNameAndEmail(name:string,email:string){
-    const response= await getByEmail(email);
+export async function createUserByNameAndEmail(data:CreateUserDto){
+    const response= await getByEmail(data.email);
     if(response){
         throw badRequest("User already exist with this Email");
     }
-    const user= await createUser(name,email);
+    const user= await createUser(data);
     if(!user){
-        throw notFound('User not found');
+        throw internalServerError('User not created');
     }
     return user;
 }
 
-export async function deleteUserByEmail(email:string){
-    const response= await getByEmail(email);
+export async function deleteUserByEmail(id:number){
+    const response= await getById(id);
     if(!response){
         throw badRequest("User does not exist in the system");
     }
-    const user= await deleteUser(email);
+    const user= await deleteUser(id);
     if(!user){
         throw badRequest("User not deleted");
     }
     return user;
 }
 
-export async function updateUserByEmail(email:string,newEmail:string,newName:string){
-    const response= await getByEmail(email);
+export async function updateUserByEmail(id:number, data:UpdateUserDto){
+    const response= await getById(id);
     if(!response){
         throw notFound('User not found');
     }
-    const res= await getByEmail(newEmail);
+    if(data.email){
+    const res= await getByEmail(data.email);
     if(res){
         throw badRequest("This email is already taken");
     }
-    const user= await updateUser(email,newEmail,newName);
+    }
+    const user= await updateUser(id,data);
     if(!user){
-        throw badRequest("User not updated");
+        throw internalServerError("User not updated");
     }
     return user;
 }
