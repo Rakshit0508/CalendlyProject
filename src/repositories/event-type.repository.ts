@@ -58,5 +58,19 @@ export async function findByHostAndSlug(hostId:number,slug:string){
             slug
         }
     })
-
+    return eventType;
 }
+
+export async function slugExistsForHost(hostId:number, slug:string){
+    const existing= await prisma.eventType.findFirst({
+        where:{
+            hostId,
+            slug
+        }
+    })
+    return existing!==null;
+}
+
+
+
+
