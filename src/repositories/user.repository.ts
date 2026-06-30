@@ -6,7 +6,7 @@ export async function getAll(){
     return users;
 }
 
-export async function getById(id:number){
+export async function getUserById(id:number){
     const user= await prisma.user.findUnique({
         where:{
             id
