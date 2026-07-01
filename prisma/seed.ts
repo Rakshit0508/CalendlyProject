@@ -42,7 +42,13 @@ async function main() {
     ],
     skipDuplicates: true,
   });
-
+  // await prisma.eventType.createMany({
+  //   data:[
+  //     {
+        
+  //     }
+  //   ]
+  // })
   console.log("Seed completed");
 }
 

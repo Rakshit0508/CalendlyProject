@@ -10,7 +10,7 @@
     "prisma:format": "pnpx prisma format",
     "prisma:migrate": "pnpx prisma migrate dev",
     "prisma:generate": "pnpx prisma generate",
-    "prisma:all": ""
+    "prisma:all": "pnpm run prisma:format && pnpm run prisma:migrate && pnpm run prisma:generate "
   },
   "keywords": [],
   "author": "",

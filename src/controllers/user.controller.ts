@@ -1,5 +1,7 @@
 import {Request, Response} from 'express';
-import { createUserByNameAndEmail as createUserByNameAndEmailService, deleteUserByEmail as deleteUserByEmailService, findAllUsers as findAllUsersService, findUserById as findUserByIdService, updateUserByEmail as updateUserByEmailService} from '../services/users.service.js';
+import { createUserByNameAndEmail as createUserByNameAndEmailService, deleteUserByEmail as deleteUserByEmailService,
+findAllUsers as findAllUsersService, findUserById as findUserByIdService,
+updateUserByEmail as updateUserByEmailService} from '../services/users.service.js';
 import { sendSuccess } from '../utils/api-response.js';
 import { CreateUserDto, UpdateUserDto } from '../dtos/user.dto.js';
 

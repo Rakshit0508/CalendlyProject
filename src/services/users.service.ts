@@ -1,14 +1,14 @@
 import { CreateUserDto, UpdateUserDto } from "../dtos/user.dto.js";
-import { createUser, deleteUser, getAll, getByEmail, getById, updateUser } from "../repositories/user.repository.js";
+import { createUser, deleteUser, getAllUsers, getUserByEmail, getUserById, updateUser } from "../repositories/user.repository.js";
 import { badRequest, internalServerError, notFound } from "../utils/api-error.js";
 
 export async function findAllUsers(){
-    const users= await getAll();
+    const users= await getAllUsers();
     return users; 
 }
 
 export async function findUserById(id:number){
-    const user= await getById(id);
+    const user= await getUserById(id);
     if(!user){
         throw notFound('User not found');
     }
@@ -16,7 +16,7 @@ export async function findUserById(id:number){
 }
 
 export async function createUserByNameAndEmail(data:CreateUserDto){
-    const response= await getByEmail(data.email);
+    const response= await getUserByEmail(data.email);
     if(response){
         throw badRequest("User already exist with this Email");
     }
@@ -28,7 +28,7 @@ export async function createUserByNameAndEmail(data:CreateUserDto){
 }
 
 export async function deleteUserByEmail(id:number){
-    const response= await getById(id);
+    const response= await getUserById(id);
     if(!response){
         throw badRequest("User does not exist in the system");
     }
@@ -40,12 +40,12 @@ export async function deleteUserByEmail(id:number){
 }
 
 export async function updateUserByEmail(id:number, data:UpdateUserDto){
-    const response= await getById(id);
+    const response= await getUserById(id);
     if(!response){
         throw notFound('User not found');
     }
     if(data.email){
-    const res= await getByEmail(data.email);
+    const res= await getUserByEmail(data.email);
     if(res){
         throw badRequest("This email is already taken");
     }

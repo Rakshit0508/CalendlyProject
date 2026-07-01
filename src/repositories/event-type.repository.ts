@@ -1,7 +1,7 @@
 import {prisma} from "../config/database.js"
 import { CreateEventTypeDto, UpdateEventTypeDto } from "../dtos/event-type.dto.js";
 
-export async function findByHostId(hostId:number){
+export async function findEventsByHostId(hostId:number){
     const eventTypes= await prisma.eventType.findMany({
         where:{
             hostId
@@ -13,7 +13,7 @@ export async function findByHostId(hostId:number){
     return eventTypes
 }
 
-export async function getById(id:number){
+export async function getEventById(id:number){
     const eventType= await prisma.eventType.findUnique({
         where:{
             id
@@ -22,7 +22,7 @@ export async function getById(id:number){
     return eventType;
 }
 
-export async function create(hostId:number, data: CreateEventTypeDto & {slug:String}){
+export async function createEvent(hostId:number, data: CreateEventTypeDto & {slug:String}){
     const eventType= await prisma.eventType.create({
         data:{
             hostId,
@@ -32,7 +32,7 @@ export async function create(hostId:number, data: CreateEventTypeDto & {slug:Str
     return eventType;
 }
 
-export async function update(id:number, data:UpdateEventTypeDto){
+export async function updateEvent(id:number, data:UpdateEventTypeDto){
     const eventType= await prisma.eventType.update({
         where:{
             id
@@ -42,16 +42,16 @@ export async function update(id:number, data:UpdateEventTypeDto){
     return eventType;
 }
 
-export async function remove(id:number){
-    const eventType= await prisma.eventType.delete({
+export async function removeEvent(id:number){
+    await prisma.eventType.delete({
         where:{
             id
         }
     })
-    return eventType;
+    return;
 }
 
-export async function findByHostAndSlug(hostId:number,slug:string){
+export async function findEventByHostAndSlug(hostId:number,slug:string){
     const eventType= await prisma.eventType.findFirst({
         where:{
             hostId,
@@ -61,7 +61,7 @@ export async function findByHostAndSlug(hostId:number,slug:string){
     return eventType;
 }
 
-export async function findActiveByHostIdAndEventSlug(hostId:number,slug:string){
+export async function findActiveEventByHostIdAndEventSlug(hostId:number,slug:string){
     const eventType= await prisma.eventType.findFirst({
         where:{
             isActive:true,
@@ -72,7 +72,7 @@ export async function findActiveByHostIdAndEventSlug(hostId:number,slug:string){
     return eventType;
 }
 
-export async function slugExistsForHost(hostId:number, slug:string){
+export async function eventSlugExistsForHost(hostId:number, slug:string){
     const existing= await prisma.eventType.findFirst({
         where:{
             hostId,
