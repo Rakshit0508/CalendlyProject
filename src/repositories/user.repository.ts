@@ -24,7 +24,7 @@ export async function getUserByEmail(email:string){
     return user;
 }
 
-export async function createUser(data: CreateUserDto){
+export async function createUser(data: CreateUserDto & {slug:string}){
     const user= await prisma.user.create({
         data
     })
@@ -48,4 +48,13 @@ export async function updateUser(id:number, data:UpdateUserDto){
         data
     })
     return user;
+}
+
+export async function slugExistInUserDb(slug:string){
+    const isSlugExist= await prisma.user.findFirst({
+        where:{
+            slug
+        }
+    })
+    return isSlugExist!==null
 }

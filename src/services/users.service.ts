@@ -1,6 +1,7 @@
 import { CreateUserDto, UpdateUserDto } from "../dtos/user.dto.js";
-import { createUser, deleteUser, getAllUsers, getUserByEmail, getUserById, updateUser } from "../repositories/user.repository.js";
-import { badRequest, internalServerError, notFound } from "../utils/api-error.js";
+import { createUser, deleteUser, getAllUsers, getUserByEmail, getUserById, slugExistInUserDb, updateUser } from "../repositories/user.repository.js";
+import { badRequest, internalServerError, notFound,conflict } from "../utils/api-error.js";
+import slug from "slug";
 
 export async function findAllUsers(){
     const users= await getAllUsers();
@@ -20,7 +21,15 @@ export async function createUserByNameAndEmail(data:CreateUserDto){
     if(response){
         throw badRequest("User already exist with this Email");
     }
-    const user= await createUser(data);
+    const slugPassed= data.slug ?? slug(data.name,{lower:true});
+    if(!slugPassed){
+        throw conflict('Could not generate a slug for the user');
+    }
+    const isSlugTaken= await slugExistInUserDb(slugPassed);
+    if(isSlugTaken){
+        throw conflict('A user with this slug already exists, please use a different slug')
+    }
+    const user= await createUser({...data,slug:slugPassed});
     if(!user){
         throw internalServerError('User not created');
     }
@@ -49,6 +58,12 @@ export async function updateUserByEmail(id:number, data:UpdateUserDto){
     if(res){
         throw badRequest("This email is already taken");
     }
+    }
+    if(data.slug && data.slug!==response.slug){
+        const isSlugTaken= await slugExistInUserDb(data.slug);
+        if(isSlugTaken){
+            throw conflict('A user with this slug already exists, please enter a different slug');
+        }
     }
     const user= await updateUser(id,data);
     if(!user){
