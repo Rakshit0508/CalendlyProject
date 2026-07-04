@@ -1,6 +1,6 @@
 import { CreateUserDto, UpdateUserDto } from "../dtos/user.dto.js";
 import { createUser, deleteUser, getAllUsers, getUserByEmail, getUserById, slugExistInUserDb, updateUser } from "../repositories/user.repository.js";
-import { badRequest, internalServerError, notFound,conflict } from "../utils/api-error.js";
+import { badRequest, notFound, conflict } from "../utils/api-error.js";
 import slug from "slug";
 
 export async function findAllUsers(){
@@ -21,7 +21,7 @@ export async function createUserByNameAndEmail(data:CreateUserDto){
     if(response){
         throw badRequest("User already exist with this Email");
     }
-    const slugPassed= data.slug ?? slug(data.name,{lower:true});
+    const slugPassed= data.slug ?? slug(data.name,{lower:true}); // make the slug unique (system design of url shortner)
     if(!slugPassed){
         throw conflict('Could not generate a slug for the user');
     }
@@ -29,11 +29,7 @@ export async function createUserByNameAndEmail(data:CreateUserDto){
     if(isSlugTaken){
         throw conflict('A user with this slug already exists, please use a different slug')
     }
-    const user= await createUser({...data,slug:slugPassed});
-    if(!user){
-        throw internalServerError('User not created');
-    }
-    return user;
+    return createUser({...data,slug:slugPassed});
 }
 
 export async function deleteUserByEmail(id:number){
@@ -41,11 +37,7 @@ export async function deleteUserByEmail(id:number){
     if(!response){
         throw badRequest("User does not exist in the system");
     }
-    const user= await deleteUser(id);
-    if(!user){
-        throw badRequest("User not deleted");
-    }
-    return user;
+    return await deleteUser(id);
 }
 
 export async function updateUserByEmail(id:number, data:UpdateUserDto){
@@ -65,9 +57,5 @@ export async function updateUserByEmail(id:number, data:UpdateUserDto){
             throw conflict('A user with this slug already exists, please enter a different slug');
         }
     }
-    const user= await updateUser(id,data);
-    if(!user){
-        throw internalServerError("User not updated");
-    }
-    return user;
+    return await updateUser(id,data);
 }

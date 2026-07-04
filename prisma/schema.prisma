@@ -49,23 +49,24 @@ model EventType {
 
 model AvailabilityRule {
   id        Int      @id @default(autoincrement())
-  userID    Int
+  userId    Int
   weekday   Int
   startTime String
   endTime   String
+  isActive  Boolean  @default(true)
   timezone  String   @default("UTC")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  user User @relation(fields: [userID], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@index([userID, weekday])
+  @@index([userId, weekday])
   @@map("availability_rules")
 }
 
 model AvailabilityException {
   id        Int      @id @default(autoincrement())
-  userID    Int
+  userId    Int
   date      DateTime @db.Date
   type      String
   startTime String?
@@ -75,15 +76,15 @@ model AvailabilityException {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  user User @relation(fields: [userID], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@index([userID, date])
+  @@index([userId, date])
   @@map("availability_exceptions")
 }
 
 model Slot {
   id          Int      @id @default(autoincrement())
-  hostID      Int
+  hostId      Int
   eventTypeId Int
   startAt     DateTime
   endAt       DateTime
@@ -92,20 +93,20 @@ model Slot {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  host      User      @relation(fields: [hostID], references: [id], onDelete: Cascade)
+  host      User      @relation(fields: [hostId], references: [id], onDelete: Cascade)
   eventType EventType @relation(fields: [eventTypeId], references: [id], onDelete: Cascade)
 
   bookings Booking[]
 
   @@unique([eventTypeId, startAt, endAt])
-  @@index([hostID, startAt])
+  @@index([hostId, startAt])
   @@index([eventTypeId, startAt, status])
   @@map("slots")
 }
 
 model Booking {
   id           Int     @id @default(autoincrement())
-  hostID       Int
+  hostId       Int
   eventTypeId  Int
   slotId       Int
   inviteeEmail String
@@ -119,12 +120,12 @@ model Booking {
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
 
-  host      User      @relation("HostBookings", fields: [hostID], references: [id], onDelete: Cascade)
+  host      User      @relation("HostBookings", fields: [hostId], references: [id], onDelete: Cascade)
   eventType EventType @relation(fields: [eventTypeId], references: [id], onDelete: Cascade)
   slot      Slot      @relation(fields: [slotId], references: [id], onDelete: Cascade)
 
   @@index([inviteeEmail])
-  @@index([hostID, createdAt])
+  @@index([hostId, createdAt])
   @@index([status])
   @@map("bookings")
 }

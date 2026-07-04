@@ -40,13 +40,13 @@ export async function removeEventType(hostId: number,id:number){
 }
 
 export async function getEventTypePublic(hostId:number,eventSlug:string) {
-    const eventType= await findActiveEventByHostIdAndEventSlug(hostId,eventSlug);
-    if(!eventType){
-        throw notFound('Event type not found');
-    }
     const host= await getUserById(hostId);
     if(!host){
         throw notFound('User not found');
+    }
+    const eventType= await findActiveEventByHostIdAndEventSlug(hostId,eventSlug);
+    if(!eventType){
+        throw notFound('Event type not found');
     }
     
     return{

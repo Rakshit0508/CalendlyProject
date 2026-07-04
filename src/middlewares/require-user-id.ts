@@ -1,8 +1,9 @@
 import { Request,Response,NextFunction } from "express";
-import { badRequest, unauthorized } from "../utils/api-error.js";
+import { badRequest, notFound, unauthorized } from "../utils/api-error.js";
+import { getUserById } from "../repositories/user.repository.js";
 
 
-export function requireUserId( req:Request,_res:Response,next:NextFunction){
+export async function requireUserId( req:Request,_res:Response,next:NextFunction){
     const userIdHeader= req.header('x-user-id');
 
     if(!userIdHeader || Array.isArray(userIdHeader)|| typeof userIdHeader!=='string'){
@@ -13,7 +14,10 @@ export function requireUserId( req:Request,_res:Response,next:NextFunction){
     if(Number.isNaN(userId)){
         throw badRequest('x-user-id header must be a valid number');
     }
-
+    const host= await getUserById(userId);
+    if(!host){
+        throw notFound('User does not exist in the database');
+    }
     req.userId= userId;
     next();
 }
