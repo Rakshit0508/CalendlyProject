@@ -14,10 +14,10 @@ export async function findRulesByUser(userId:number){
     })
 }
 
-export async function findRuleById(id:number){
+export async function findRuleById(ruleId:number){
     return await prisma.availabilityRule.findUnique({
         where:{
-            id
+            ruleId
         }
     })
 }
@@ -31,16 +31,16 @@ export async function createRule(userId: number,data: CreateAvailabilityRuleDto)
     })
 }
 
-export async function updateRule(id:number,data:UpdateAvailabilityRuleDto) {
+export async function updateRule(ruleId:number,data:UpdateAvailabilityRuleDto) {
     return await prisma.availabilityRule.update({
-        where:{id},
+        where:{ruleId},
         data
     })
 }
 
-export async function removeRule(id:number){
+export async function removeRule(ruleId:number){
     await prisma.availabilityRule.delete({
-        where:{id}
+        where:{ruleId}
     })
 }
 
@@ -56,10 +56,10 @@ export async function findExceptionsByUser(userId:number){
     })
 }
 
-export async function findExceptionById(id:number){
+export async function findExceptionById(exceptionId:number){
     return await prisma.availabilityException.findUnique({
         where:{
-            id
+            exceptionId
         }
     })
 }
@@ -75,11 +75,11 @@ export async function createException(userId:number,data:CreateAvailabilityExcep
     })
 }
 
-export async function updateException(id:number,data:UpdateAvailabilityExceptionDto){
+export async function updateException(exceptionId:number,data:UpdateAvailabilityExceptionDto){
     const {date,...rest}= data;
     return await prisma.availabilityException.update({
         where:{
-            id
+            exceptionId
         },
         data:{
             ...rest,
@@ -88,10 +88,10 @@ export async function updateException(id:number,data:UpdateAvailabilityException
     })
 }
 
-export async function removeException(id:number){
+export async function removeException(exceptionId:number){
     await prisma.availabilityException.delete({
         where:{
-            id
+            exceptionId
         }
     })
 }

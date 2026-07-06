@@ -1,9 +1,9 @@
 import {prisma} from "../config/database.js"
 
-export async function findBookedSlotsByHostInRange(hostId:number,startDate:Date,endDate:Date){
+export async function findBookedSlotsByHostInRange(userId:number,startDate:Date,endDate:Date){
     return prisma.slot.findMany({
         where:{
-            hostId,
+            userId,
             startAt:{
                 gte:startDate,
                 lte:endDate

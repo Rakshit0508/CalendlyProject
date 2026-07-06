@@ -6,10 +6,10 @@ export async function getAllUsers(){
     return users;
 }
 
-export async function getUserById(id:number){
+export async function getUserById(userId:number){
     const user= await prisma.user.findUnique({
         where:{
-            id
+            userId
         }
     })
     return user;
@@ -31,19 +31,18 @@ export async function createUser(data: CreateUserDto & {slug:string}){
     return user;
 }
 
-export async function deleteUser(id:number){
-    const user= await prisma.user.delete({
+export async function deleteUser(userId:number){
+    await prisma.user.delete({
         where:{
-            id
+            userId
         }
     })
-    return user;
 }
 
-export async function updateUser(id:number, data:UpdateUserDto){
+export async function updateUser(userId:number, data:UpdateUserDto){
     const user= await prisma.user.update({
         where:{
-            id
+            userId
         },
         data
     })

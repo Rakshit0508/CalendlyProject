@@ -9,7 +9,7 @@ export const eventTypeRouter: Router= Router({mergeParams:true});
 eventTypeRouter.use(requireUserId);
 
 eventTypeRouter.get('/',listEventTypes);
-eventTypeRouter.get('/:id',getEventById);
+eventTypeRouter.get('/:eventTypeId',getEventById);
 eventTypeRouter.post('/',validate(createEventTypeSchema),createEventType);
-eventTypeRouter.patch('/:id',validate(updateEventTypeSchema),updateEventType);
-eventTypeRouter.delete('/:id',removeEventType);
+eventTypeRouter.patch('/:eventTypeId',validate(updateEventTypeSchema),updateEventType);
+eventTypeRouter.delete('/:eventTypeId',removeEventType);

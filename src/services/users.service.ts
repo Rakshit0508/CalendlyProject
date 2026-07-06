@@ -8,8 +8,8 @@ export async function findAllUsers(){
     return users; 
 }
 
-export async function findUserById(id:number){
-    const user= await getUserById(id);
+export async function findUserById(userId:number){
+    const user= await getUserById(userId);
     if(!user){
         throw notFound('User not found');
     }
@@ -32,16 +32,16 @@ export async function createUserByNameAndEmail(data:CreateUserDto){
     return createUser({...data,slug:slugPassed});
 }
 
-export async function deleteUserByEmail(id:number){
-    const response= await getUserById(id);
+export async function deleteUserByEmail(userId:number){
+    const response= await getUserById(userId);
     if(!response){
         throw badRequest("User does not exist in the system");
     }
-    return await deleteUser(id);
+    return await deleteUser(userId);
 }
 
-export async function updateUserByEmail(id:number, data:UpdateUserDto){
-    const response= await getUserById(id);
+export async function updateUserByEmail(userId:number, data:UpdateUserDto){
+    const response= await getUserById(userId);
     if(!response){
         throw notFound('User not found');
     }
@@ -57,5 +57,5 @@ export async function updateUserByEmail(id:number, data:UpdateUserDto){
             throw conflict('A user with this slug already exists, please enter a different slug');
         }
     }
-    return await updateUser(id,data);
+    return await updateUser(userId,data);
 }
