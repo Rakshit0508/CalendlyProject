@@ -34,7 +34,7 @@ export async function regenerateHostSlots(input: RegenerateHostSlotsInput){
         findBookedSlotsByHostInRange(input.userId,from.toJSDate(),to.toJSDate())
     ])
 
-    // coverty booked slots to time windows-> compatible with luxon
+    // convert booked slots to time windows-> compatible with luxon
     const bookedWindows: TimeWindow[]= bookedSlots.map((slot)=>{
         return{
             start: DateTime.fromJSDate(slot.startAt,{zone:'utc'}),
@@ -43,6 +43,7 @@ export async function regenerateHostSlots(input: RegenerateHostSlotsInput){
     });
 
     for(const eventType of eventTypes){
+        const generatedValidSlotKeys= new Set<string>();
         for(let cursor= from;cursor<= to;cursor=cursor.plus({days:1})){
             const dateKey= cursor.toISODate(); // 2026-06-01
             const dayExceptions= exceptions.filter((ex)=> DateTime.fromJSDate(ex.date,{zone:'utc'}).toISODate()===dateKey)
@@ -72,6 +73,7 @@ export async function regenerateHostSlots(input: RegenerateHostSlotsInput){
                 const startAt= slot.start.toUTC().toJSDate();
                 const endAt= slot.end.toUTC().toJSDate();
                 const key= `${eventType.eventTypeId}| ${startAt.toISOString()}| ${endAt.toISOString()}`;
+                generatedValidSlotKeys.add(key);
 
                 await prisma.slot.upsert({
                     where:{
@@ -94,5 +96,25 @@ export async function regenerateHostSlots(input: RegenerateHostSlotsInput){
                 })
             }
         }
+        const futureSlots= await prisma.slot.findMany({
+            where:{
+                eventTypeId: eventType.eventTypeId,
+                startAt:{gte: from.toJSDate(), lte:to.toJSDate()},
+                status:{in:['AVAILABLE','BLOCKED']},
+            }
+        })
+
+        for(const slot of futureSlots){
+            const key= `${eventType.eventTypeId}| ${slot.startAt.toISOString()}| ${slot.endAt.toISOString()}`; 
+            if(!generatedValidSlotKeys.has(key)){
+                // this slot is no longer valid
+                await prisma.slot.update({
+                    where:{slotId: slot.slotId},
+                    data:{status:"BLOCKED"}
+                });
+            }
+        }
     }
 }
+
+// invalidSlots = all slots in my db- new slots.
