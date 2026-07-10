@@ -14,6 +14,19 @@ export async function findRulesByUser(userId:number){
     })
 }
 
+export async function findActiveRulesByUser(userId:number){
+    return await prisma.availabilityRule.findMany({
+        where:{
+            userId, isActive:true
+        },
+        orderBy:[{
+            weekday:"asc"
+        },{
+            startTime:"asc"
+        }]
+    })
+}
+
 export async function findRuleById(ruleId:number){
     return await prisma.availabilityRule.findUnique({
         where:{

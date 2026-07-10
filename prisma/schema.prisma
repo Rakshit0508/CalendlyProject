@@ -83,7 +83,7 @@ model AvailabilityException {
 }
 
 model Slot {
-  slotId      Int      @id @default(autoincrement())
+  slotId      String   @id @default(cuid())
   userId      Int
   eventTypeId Int
   startAt     DateTime
@@ -108,7 +108,7 @@ model Booking {
   bookingId    Int     @id @default(autoincrement())
   userId       Int
   eventTypeId  Int
-  slotId       Int
+  slotId       String
   inviteeEmail String
   inviteeNotes String?
   inviteeName  String

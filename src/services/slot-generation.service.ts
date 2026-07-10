@@ -35,7 +35,7 @@ export function mergeWindows(window:TimeWindow[]):TimeWindow[]{
     return mergedResult;
 }
 
-export function spiltIntoSlots(windows:TimeWindow[],durationMinutes: number,
+export function splitIntoSlots(windows:TimeWindow[],durationMinutes: number,
      buferBeforeMinutes:number,bufferAfterMinutes:number): TimeWindow[]{
         const slots: TimeWindow[]=[];
         const totalMinutes= durationMinutes + buferBeforeMinutes + bufferAfterMinutes;
@@ -95,7 +95,7 @@ export function overlapsBooked(slot: TimeWindow, booked:TimeWindow[],
 // apply exceptions for a particular date.
 export function applyExceptionsForDate( date:DateTime, baseWindows: TimeWindow[],
     exceptions: Array<{
-        type:"BLOCK_FULL_DAY"| "BLOCK_PARTIAL" | "ADD_AVAILABLE_WINDOW",
+        type:string,
         startTime: string|null,
         endTime: string|null,
         timeZone: string
@@ -126,3 +126,24 @@ export function applyExceptionsForDate( date:DateTime, baseWindows: TimeWindow[]
         }
         return mergeWindows(windows);
     }
+
+export function windowsForWeekdayRule(
+    date:DateTime,
+    weekday: number,
+    startTime:string,
+    endTime:string,
+    timezone:string
+): TimeWindow[]{
+
+    const localDate= date.setZone(timezone).startOf('day');
+    const luxonWeekDay= weekday===0 ?7:weekday;
+
+    if(localDate.weekday!==luxonWeekDay) return [];
+
+    const start= parseTimeOnDate(localDate,startTime,timezone);
+    const end= parseTimeOnDate(localDate,endTime,timezone);
+
+    if(!start.isValid || !end.isValid || start>=end) return [];
+
+    return [{start,end}];
+}
