@@ -1,5 +1,4 @@
 import {prisma} from "../config/database.js"
-import { createHostSlotsDto } from "../dtos/slot.dto.js"
 
 export async function findBookedSlotsByHostInRange(userId:number,startDate:Date,endDate:Date){
     return prisma.slot.findMany({
@@ -14,24 +13,50 @@ export async function findBookedSlotsByHostInRange(userId:number,startDate:Date,
     })
 }
 
-export async function createHostSlots(userId:number,eventTypeId:number, data: createHostSlotsDto){
-    return prisma.slot.create({
-        data:{
+export async function upsertAvailableSlots(userId:number, eventTypeId:number,startAt:Date,endAt:Date){
+    return prisma.slot.upsert({
+        where:{
+            eventTypeId_startAt_endAt:{
+                eventTypeId,
+                startAt,
+                endAt
+            }
+        },
+        create:{
             userId,
             eventTypeId,
-            ...data
+            startAt,
+            endAt,
+            status:"AVAILABLE"
+        },
+        update:{
+            status:"AVAILABLE"
         }
     })
 }
 
-export async function getHostSlots(userId:number,eventTypeId:number){
+export async function findFutureSlotsInRange(eventTypeId:number,startDate:Date,endDate:Date){
     return prisma.slot.findMany({
         where:{
-            userId,
             eventTypeId,
+            startAt:{
+                gte:startDate,
+                lte:endDate
+            },
+            status:{in:["AVAILABLE","BLOCKED"]}
+        }
+    })
+}
+
+export async function blockInvalidSlots(invalidId:string[]){
+    return prisma.slot.updateMany({
+        where:{
+            slotId:{
+                in: invalidId
+            }
         },
-        orderBy:[{
-            startAt:"asc"
-        }]
+        data:{
+            status:"BLOCKED"
+        }
     })
 }

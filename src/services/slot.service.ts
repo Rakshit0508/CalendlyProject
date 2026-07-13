@@ -1,10 +1,10 @@
 import { findExceptionsByUserInRange, findActiveRulesByUser } from "../repositories/availability.repository.js";
 import { findActiveEventTypesByHost } from "../repositories/event-type.repository.js";
-import { findBookedSlotsByHostInRange } from "../repositories/slot.repository.js"; 
+import { blockInvalidSlots, findBookedSlotsByHostInRange, findFutureSlotsInRange, upsertAvailableSlots } from "../repositories/slot.repository.js"; 
 import {DateTime} from "luxon";
-import {prisma} from "../config/database.js";
 import { SLOT_GENERATION_DAYS } from "../config/env.js";
 import { TimeWindow, applyExceptionsForDate, overlapsBooked, splitIntoSlots, windowsForWeekdayRule } from "./slot-generation.service.js";
+import { getUserById } from "../repositories/user.repository.js";
 
 // export async function findBookedSlotsByHostIdInRange(userId:number,startDate:Date,endDate:Date){
 //     const user= await getUserById(userId);
@@ -21,7 +21,7 @@ export interface RegenerateHostSlotsInput{
 }
 
 export async function regenerateHostSlots(input: RegenerateHostSlotsInput){
-    const host= await prisma.user.findUnique({where:{userId:input.userId}});
+    const host= await getUserById(input.userId);
     if(!host) return;
 
     const from= input.from? DateTime.fromISO(input.from,{zone:"UTC"}).startOf('day'): DateTime.now().startOf('day');
@@ -72,47 +72,21 @@ export async function regenerateHostSlots(input: RegenerateHostSlotsInput){
             for(const slot of slots){
                 const startAt= slot.start.toUTC().toJSDate();
                 const endAt= slot.end.toUTC().toJSDate();
-                const key= `${eventType.eventTypeId}| ${startAt.toISOString()}| ${endAt.toISOString()}`;
+                const key= `${eventType.eventTypeId}|${startAt.toISOString()}|${endAt.toISOString()}`;
                 generatedValidSlotKeys.add(key);
-
-                await prisma.slot.upsert({
-                    where:{
-                        eventTypeId_startAt_endAt:{
-                            eventTypeId: eventType.eventTypeId,
-                            startAt,
-                            endAt
-                        }
-                    },
-                    create:{
-                        userId: input.userId,
-                        eventTypeId:eventType.eventTypeId,
-                        startAt,
-                        endAt,
-                        status:"AVAILABLE"
-                    },
-                    update:{
-                        status:"AVAILABLE"
-                    }
-                })
+                await upsertAvailableSlots(input.userId,eventType.eventTypeId,startAt,endAt);
             }
         }
-        const futureSlots= await prisma.slot.findMany({
-            where:{
-                eventTypeId: eventType.eventTypeId,
-                startAt:{gte: from.toJSDate(), lte:to.toJSDate()},
-                status:{in:['AVAILABLE','BLOCKED']},
-            }
-        })
-
+        const futureSlots= await findFutureSlotsInRange(eventType.eventTypeId,from.toJSDate(),to.toJSDate());
+        const invalidId: string[]=[];
         for(const slot of futureSlots){
-            const key= `${eventType.eventTypeId}| ${slot.startAt.toISOString()}| ${slot.endAt.toISOString()}`; 
+            const key= `${eventType.eventTypeId}|${slot.startAt.toISOString()}|${slot.endAt.toISOString()}`; 
             if(!generatedValidSlotKeys.has(key)){
-                // this slot is no longer valid
-                await prisma.slot.update({
-                    where:{slotId: slot.slotId},
-                    data:{status:"BLOCKED"}
-                });
+                invalidId.push(slot.slotId);
             }
+        }
+        if(invalidId.length>0){
+            await blockInvalidSlots(invalidId);
         }
     }
 }
