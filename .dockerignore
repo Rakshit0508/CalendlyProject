@@ -2,3 +2,4 @@ dist
 .pnpm-store
 .git
 .env
+node_modules

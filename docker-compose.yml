@@ -2,10 +2,50 @@ version: "3.9"
 
 services:
 
+  temporal:
+    container_name: temporal_server
+    restart: unless-stopped
+    image: temporalio/auto-setup:1.25.2
+    depends_on:
+      postgres_db:
+        condition: service_healthy
+    environment:
+      DB: postgres12
+      DB_PORT: 5432
+      POSTGRES_USER: postgres
+      POSTGRES_PWD: password123
+      POSTGRES_SEEDS: postgres_db
+      DYNAMIC_CONFIG_FILE_PATH: config/dynamicConfig/development-sql.yaml
+    ports:
+      - "7233:7233"
+    volumes:
+      - ./temporal/dynamicConfig:/etc/temporal/config/dynamicConfig
+    networks:
+      - network_bridge
+
+  temporal-ui:
+    container_name: temporal_ui
+    restart: unless-stopped
+    image: temporalio/ui:2.31.2
+    depends_on:
+      - temporal
+    environment:
+      TEMPORAL_ADDRESS: temporal:7233
+      TEMPORAL_CORS_ORIGINS: http://localhost:3000,http://localhost:5173
+    ports:
+      - "8080:8080"
+    networks:
+      - network_bridge
+
   postgres_db:
     image: postgres:17
+    restart: unless-stopped
     container_name: postgres_db
-
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5  
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password123
@@ -16,13 +56,20 @@ services:
 
     networks:
       - network_bridge
+    
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
 
 
   Calendly_backend_container:
     image: calendly-image:latest
+    restart: unless-stopped
     build: .
 
     container_name: Calendly_backend_container
+    depends_on:
+      postgres_db:
+        condition: service_healthy
 
     ports:
       - "3001:3001"

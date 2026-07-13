@@ -66,7 +66,9 @@ export async function regenerateHostSlots(input: RegenerateHostSlotsInput){
                 eventType.bufferBeforeMinutes,
                 eventType.bufferAfterMinutes
             ).filter(
-                (slot)=> slot.start> DateTime.utc() && !overlapsBooked(slot,bookedWindows,eventType.bufferBeforeMinutes,eventType.bufferAfterMinutes)
+                (slot)=> slot.start> DateTime.utc() 
+                && 
+                !overlapsBooked(slot,bookedWindows,eventType.bufferBeforeMinutes,eventType.bufferAfterMinutes)
             ); // slots filtered to exclude past slots and slots that overlapped with booked slots
 
             for(const slot of slots){
