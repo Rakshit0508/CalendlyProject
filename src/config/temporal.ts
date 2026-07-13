@@ -15,7 +15,7 @@ export async function getTemporalClient(){
     return client;
 }
 
-async function disconnectTemporal(){
+export async function disconnectTemporal(){
     if(client){
         await client.connection.close();
         client=null;

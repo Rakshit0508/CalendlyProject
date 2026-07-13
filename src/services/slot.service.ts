@@ -24,8 +24,8 @@ export async function regenerateHostSlots(input: RegenerateHostSlotsInput){
     const host= await getUserById(input.userId);
     if(!host) return;
 
-    const from= input.from? DateTime.fromISO(input.from,{zone:"UTC"}).startOf('day'): DateTime.now().startOf('day');
-    const to= input.to? DateTime.fromISO(input.to,{zone:"UTC"}).endOf('day'): from.plus({days:SLOT_GENERATION_DAYS}).endOf('day');
+    const from= input.from? DateTime.fromISO(input.from,{zone:"UTC"}).startOf('day'): DateTime.now().startOf('day').toUTC();
+    const to= input.to? DateTime.fromISO(input.to,{zone:"UTC"}).endOf('day'): from.plus({days:SLOT_GENERATION_DAYS}).endOf('day').toUTC();
 
     const [rules,exceptions,eventTypes,bookedSlots]= await Promise.all([
         findActiveRulesByUser(input.userId),
