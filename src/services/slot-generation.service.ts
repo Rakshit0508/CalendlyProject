@@ -48,7 +48,7 @@ export function splitIntoSlots(windows:TimeWindow[],durationMinutes: number,
                 const slotEnd= slotStart.plus({minutes:durationMinutes});
 
                 slots.push({start:slotStart,end:slotEnd});
-                cursor.plus({minutes:durationMinutes}); // this is efficient packing. to change use totalMinutes.
+                cursor= cursor.plus({minutes:durationMinutes}); // this is efficient packing. to change use totalMinutes.
             }
         }
         return slots;

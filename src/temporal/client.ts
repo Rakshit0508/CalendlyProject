@@ -29,7 +29,7 @@ async function startWorkflow(
     }
 }
 
-export async function regenerateHostSlotsWorkflow(input: RegenerateHostSlotsInput){
+export async function startRegenerateHostSlotsWorkflow(input: RegenerateHostSlotsInput){
     return startWorkflow(
         'regenerateHostSlotsWorkflow',
         `regenerate-host-slots-${input.userId}-${Date.now()}`,

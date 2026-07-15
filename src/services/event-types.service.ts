@@ -4,6 +4,7 @@ import { createEvent, findActiveEventByHostIdAndEventSlug, findEventsByUser,
 getEventById, removeEvent, eventSlugExistsForHost, updateEvent, findActiveEventTypesByHost } from "../repositories/event-type.repository.js";
 import { conflict, forbidden, notFound} from "../utils/api-error.js";
 import { getUserById } from "../repositories/user.repository.js";
+import { startRegenerateHostSlotsWorkflow } from "../temporal/client.js";
 
 export async function listEventTypes(userId:number){
     const eventTypes= await findEventsByUser(userId);
@@ -25,7 +26,9 @@ export async function createEventType(userId:number,data:CreateEventTypeDto){
     if(isSlugTaken){
         throw conflict('Event type with this slug already exists, please use a different slug')
     }
-    return createEvent(userId,{...data, slug:slugPassed});
+    const eventType= createEvent(userId,{...data, slug:slugPassed});
+    await startRegenerateHostSlotsWorkflow({userId});
+    return eventType;
 }
 
 export async function removeEventType(userId: number,eventTypeId:number){

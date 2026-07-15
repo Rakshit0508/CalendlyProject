@@ -5,14 +5,16 @@ import {DateTime} from "luxon";
 import { SLOT_GENERATION_DAYS } from "../config/env.js";
 import { TimeWindow, applyExceptionsForDate, overlapsBooked, splitIntoSlots, windowsForWeekdayRule } from "./slot-generation.service.js";
 import { getUserById } from "../repositories/user.repository.js";
+import { notFound } from "../utils/api-error.js";
 
-// export async function findBookedSlotsByHostIdInRange(userId:number,startDate:Date,endDate:Date){
-//     const user= await getUserById(userId);
-//     if(!user){
-//         throw notFound("User not found")
-//     }
-//     return findBookedSlotsByHostInRange(userId,startDate,endDate);
-// }
+
+export async function findBookedSlotsByHostIdInRange(userId:number,startDate:Date,endDate:Date){
+    const user= await getUserById(userId);
+    if(!user){
+        throw notFound("User not found")
+    }
+    return findBookedSlotsByHostInRange(userId,startDate,endDate);
+}
 
 export interface RegenerateHostSlotsInput{
     userId: number,
@@ -33,8 +35,6 @@ export async function regenerateHostSlots(input: RegenerateHostSlotsInput){
         findActiveEventTypesByHost(input.userId),
         findBookedSlotsByHostInRange(input.userId,from.toJSDate(),to.toJSDate())
     ])
-
-    // convert booked slots to time windows-> compatible with luxon
     const bookedWindows: TimeWindow[]= bookedSlots.map((slot)=>{
         return{
             start: DateTime.fromJSDate(slot.startAt,{zone:'utc'}),
@@ -70,7 +70,6 @@ export async function regenerateHostSlots(input: RegenerateHostSlotsInput){
                 && 
                 !overlapsBooked(slot,bookedWindows,eventType.bufferBeforeMinutes,eventType.bufferAfterMinutes)
             ); // slots filtered to exclude past slots and slots that overlapped with booked slots
-
             for(const slot of slots){
                 const startAt= slot.start.toUTC().toJSDate();
                 const endAt= slot.end.toUTC().toJSDate();
