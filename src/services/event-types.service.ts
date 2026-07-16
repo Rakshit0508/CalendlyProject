@@ -26,7 +26,7 @@ export async function createEventType(userId:number,data:CreateEventTypeDto){
     if(isSlugTaken){
         throw conflict('Event type with this slug already exists, please use a different slug')
     }
-    const eventType= createEvent(userId,{...data, slug:slugPassed});
+    const eventType= await createEvent(userId,{...data, slug:slugPassed});
     await startRegenerateHostSlotsWorkflow({userId});
     return eventType;
 }
@@ -39,7 +39,9 @@ export async function removeEventType(userId: number,eventTypeId:number){
     if(eventType.userId!==userId){
         throw forbidden('You are not authorised to delete this event type');
     }
-    return removeEvent(eventTypeId);
+    const removeEventType= await removeEvent(eventTypeId);
+    await startRegenerateHostSlotsWorkflow({userId});
+    return removeEventType;
 }
 
 export async function getEventTypePublic(userId:number,eventSlug:string) {
@@ -78,7 +80,9 @@ export async function updateEventType(userId:number,eventTypeId:number,data:Upda
             throw conflict('An event type with this slug already exists, please enter a different slug');
         }
     }
-    return updateEvent(eventTypeId,data);
+    const updateEventType= await updateEvent(eventTypeId,data);
+    await startRegenerateHostSlotsWorkflow({userId});
+    return updateEventType;
 }
 
 export async function findActiveEventTypesByHostId(userId:number){
