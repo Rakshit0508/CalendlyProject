@@ -5,6 +5,7 @@ import { routeNotFound } from "./middlewares/route-not-found.js";
 import { eventTypeRouter } from "./routers/event-type.router.js";
 import { publicEventRouter } from "./routers/public-event.router.js";
 import { availabilityRouter } from "./routers/availability.router.js";
+import { bookingRouter } from "./routers/bookings.router.js";
 
 const app:Express= express();
 app.use(express.json());
@@ -23,6 +24,7 @@ app.use('/api/users',userRouter);
 app.use('/api/event-types',eventTypeRouter);
 app.use('/api/public',publicEventRouter)
 app.use('/api/availability',availabilityRouter);
+app.use('/api/bookings',bookingRouter)
 
 app.use(routeNotFound);
 app.use(errorHandler);

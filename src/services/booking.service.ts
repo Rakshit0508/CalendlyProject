@@ -5,7 +5,7 @@ import { findSlotBySlotId, findSlotBySlotIdPessimistically,
 import { badRequest, notFound } from "../utils/api-error.js";
 import { Slot } from "../../generated/prisma/client.js";
 import { createNewBooking } from "../repositories/booking.repository.js";
-import { startRegenerateHostSlotsWorkflow } from "../temporal/client.js";
+import { startRegenerateHostSlotsWorkflow, startSendBookingConfirmationEmailWorkflow } from "../temporal/client.js";
 
 export function validateSlotInfo(slot:Slot | null){
     if(!slot){
@@ -49,6 +49,16 @@ async function triggerSlotRegen(userId:number, slotStartAt: Date){
     `)
 }
 
+ async function postBookingActions(userId: number,booking: {
+    bookingId: number,
+    status: string,
+    slot:{startAt: Date, endAt: Date}
+}){
+    await triggerSlotRegen(userId, booking.slot.startAt);
+    await startSendBookingConfirmationEmailWorkflow(booking.bookingId);
+    return formatBookingResponse(booking);
+}
+
 // In optimistic locking, technically we are allowing all the queries to 
 // start a transaction, it's just that only one of them will get the
 // status as Available and can convert it to booked.
@@ -66,8 +76,7 @@ export async function createBookingOptimistically(userId:number,data: createBook
 
         return createNewBooking(userId,slot.eventTypeId,data,tx);
     })
-    await triggerSlotRegen(userId, booking.slot.startAt);
-    return formatBookingResponse(booking);
+    return postBookingActions(userId,booking);
 }
 
 export async function createBookingPessimistically(userId: number, data: createBookingDto){
@@ -84,6 +93,5 @@ export async function createBookingPessimistically(userId: number, data: createB
     }
     return createNewBooking(userId,slot.eventTypeId,data,tx);
     })
-    await triggerSlotRegen(userId, booking.slot.startAt);
-    return formatBookingResponse(booking);
+    return postBookingActions(userId,booking);
 }

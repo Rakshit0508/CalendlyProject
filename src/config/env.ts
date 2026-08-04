@@ -10,3 +10,9 @@ export const TEMPORAL_NAMESPACE= process.env.TEMPORAL_NAMESPACE || 'default'
 export const TEMPORAL_TASK_QUEUE= process.env.TEMPORAL_TASK_QUEUE || 'calendly-tasks'
 
 export const TEMPORAL_ENABLED= process.env.TEMPORAL_ENABLED==='true';
+
+export const SMTP_HOST= process.env.SMTP_HOST || 'mailhog';
+export const SMTP_PORT= process.env.SMTP_PORT || 1025;
+export const SMTP_USER= process.env.SMTP_USER || '';
+export const SMTP_PASS= process.env.SMTP_PASS || '';
+export const EMAIL_FROM= process.env.EMAIL_FROM || 'Calendly <noreply@example.com>';

@@ -1,6 +1,6 @@
 import { createBookingDto } from "../dtos/booking.dto.js";
 import { DbClient, getDbClient } from "./db-client.js";
-
+import {prisma} from '../config/database.js'
 export async function createNewBooking(userId: number,
     eventTypeId: number,
     data: createBookingDto,
@@ -20,4 +20,17 @@ export async function createNewBooking(userId: number,
             slot:true
         }
     })
+}
+
+export async function findBookingById(bookingId: number){
+    const booking= await prisma.booking.findUnique({
+        where:{
+            bookingId
+        },
+        include:{
+            slot:true,
+            eventType:true
+        }
+    });
+    return booking;
 }
